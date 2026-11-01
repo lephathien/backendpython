@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Bảng Hiệu năng Jobs - FastAPI + AI Demo{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Bảng Hiệu năng & Danh sách Jobs</h2>
+    <p>So sánh thời gian phản hồi giữa các mode <strong>background</strong>, <strong>async</strong> và <strong>sync</strong>.</p>
+
+    <div style="overflow-x: auto; margin-top: 16px;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Job ID</th>
+                    <th>Loại</th>
+                    <th>Mode</th>
+                    <th>Trạng thái</th>
+                    <th>Thời gian xử lý</th>
+                    <th>Khởi tạo lúc</th>
+                    <th>Chi tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not jobs %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #64748b;">Chưa có job nào được tạo.</td>
+                </tr>
+                {% else %}
+                {% for j in jobs %}
+                <tr>
+                    <td>#{{ j.id }}</td>
+                    <td>{{ j.job_type }}</td>
+                    <td><span class="badge badge-{{ j.mode }}">{{ j.mode }}</span></td>
+                    <td><span class="status-badge status-{{ j.status }}">{{ j.status }}</span></td>
+                    <td>{% if j.processing_time_ms %}{{ j.processing_time_ms }} ms{% else %}-{% endif %}</td>
+                    <td>{{ j.created_at.strftime('%H:%M:%S %d/%m/%Y') if j.created_at else '-' }}</td>
+                    <td><a href="/jobs/{{ j.id }}" class="table-link">Xem</a></td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

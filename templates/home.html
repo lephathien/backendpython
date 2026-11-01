@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Bài 8: Docker và FastAPI - FastAPI + AI Demo{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Bài 8: Docker và FastAPI</h2>
+    <p>Demo ứng dụng FastAPI với LLM Gemini, hỗ trợ chat và tóm tắt tài liệu.</p>
+
+    <div style="margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px;">
+        <a class="btn-primary" href="/summarize">Tóm tắt tài liệu</a>
+        <a class="btn-secondary" href="/chat_llm">Chat LLM</a>
+        <a class="btn-outline" href="/jobs">Hiệu năng (Jobs)</a>
+        <a class="btn-outline" href="/docs">Swagger API Docs</a>
+    </div>
+</div>
+{% endblock %}

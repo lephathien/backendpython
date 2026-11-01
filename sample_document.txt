@@ -1,0 +1,15 @@
+KIẾN TRÚC XỬ LÝ ĐỘ TRỄ CAO TRONG ỨNG DỤNG WEB TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI)
+
+1. Thách thức về độ trễ trong kỷ nguyên AI
+Trong các ứng dụng web truyền thống (như quản lý bán hàng hay mạng xã hội), các truy vấn cơ sở dữ liệu thường chỉ tiêu tốn từ vài mili giây (ms) đến vài chục mili giây. Người dùng đã quen với việc nhận phản hồi gần như tức thì sau khi bấm nút submit hoặc tải lại trang. Tuy nhiên, khi tích hợp các mô hình ngôn ngữ lớn (Large Language Models - LLMs) như Google Gemini hay OpenAI GPT, một tác vụ suy luận (inference) hoặc xử lý văn bản dài (tóm tắt văn bản, phân tích ngữ nghĩa, sinh mã nguồn) thường đòi hỏi thời gian từ 5 giây đến 30 giây, thậm chí hàng phút đối với các tài liệu phức tạp. 
+
+Nếu hệ thống backend tiếp tục áp dụng cơ chế xử lý đồng bộ truyền thống (Synchronous Blocking I/O), toàn bộ luồng xử lý (worker thread) của server sẽ bị chiếm dụng và phong tỏa trong suốt thời gian chờ đợi phản hồi từ phía API của AI. Điều này không chỉ dẫn đến hiện tượng nghẽn luồng nghiêm trọng khi có nhiều người dùng đồng thời, mà còn khiến trình duyệt của người dùng bị "treo" với con trỏ xoay vòng liên tục, dễ gây ra lỗi HTTP 504 Gateway Timeout và làm suy giảm nghiêm trọng trải nghiệm người dùng (UX).
+
+2. Giải pháp kỹ thuật với FastAPI và Background Tasks
+Để khắc phục bài toán trên, kiến trúc xử lý của các hệ thống AI hiện đại được phân bổ thành ba tầng tiếp cận chính:
+- Tầng Đồng bộ (Sync): Sử dụng thư viện requests tiêu chuẩn. Phù hợp cho các tác vụ kiểm thử nhanh hoặc các pipeline batch xử lý tuần tự không yêu cầu tương tác giao diện người dùng.
+- Tầng Bất đồng bộ (Async): Sử dụng async/await kết hợp với thư viện mạng bất đồng bộ httpx.AsyncClient. Mặc dù client vẫn phải chờ đợi kết quả, nhưng luồng chính của FastAPI Event Loop không bị khóa cứng, cho phép máy chủ tiếp tục tiếp nhận hàng nghìn kết nối mạng khác trong cùng thời điểm.
+- Tầng Xử lý nền (Background Tasks): Đây là tiêu chuẩn vàng cho trải nghiệm người dùng hiện đại. Khi tiếp nhận văn bản cần tóm tắt, FastAPI ngay lập tức lưu một bản ghi "công việc" (Job) với trạng thái "pending" vào PostgreSQL và trả ngay phản hồi HTTP 303 Redirect cho trình duyệt chỉ trong vòng chưa đầy 30ms. Công việc gọi AI nặng nề được đẩy vào hàng đợi nền (Background Queue). Trên giao diện người dùng, trang theo dõi tiến trình (Job Status) sẽ định kỳ thăm dò (Auto Polling sau mỗi 3 giây) để tự động hiển thị kết quả ngay khi tác vụ ngầm hoàn tất.
+
+3. Kết luận và định hướng thực tế
+Việc kết hợp linh hoạt giữa cơ chế lập trình bất đồng bộ (Asynchronous Programming) và xử lý tác vụ nền (Background Processing) giúp hệ thống web backend đạt được độ tin cậy cao, khả năng chịu tải vượt trội, đồng thời mang lại trải nghiệm tương tác liền mạch, mượt mà và chuyên nghiệp cho người dùng cuối.

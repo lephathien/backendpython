@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Trạng thái job #{{ job.id }} - FastAPI + AI Demo{% endblock %}
+
+{% block head %}
+{% if job.status in ['pending', 'running'] %}
+<meta http-equiv="refresh" content="3">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Trạng thái job #{{ job.id }}</h2>
+
+    <div class="job-status-card">
+        <p><strong>Loại job:</strong> {{ job.job_type }}</p>
+        <p><strong>Mode:</strong> {{ job.mode }}</p>
+        <p><strong>Trạng thái:</strong> 
+            <span class="status-badge status-{{ job.status }}">{{ job.status }}</span>
+        </p>
+        <p><strong>Thời gian xử lý:</strong> 
+            {% if job.processing_time_ms %}
+                {{ job.processing_time_ms }} ms
+            {% else %}
+                Đang xử lý...
+            {% endif %}
+        </p>
+    </div>
+
+    {% if job.status in ['pending', 'running'] %}
+        <div class="refresh-notice">
+            <p>Job đang chạy nền. Trang sẽ tự tải lại sau 3 giây.</p>
+            <p><a href="/jobs/{{ job.id }}" class="refresh-link">Refresh ngay</a></p>
+        </div>
+    {% elif job.status == 'done' %}
+        <div class="job-result-box">
+            <h4>Kết quả</h4>
+            <div class="result-content">{{ job.result_text }}</div>
+        </div>
+        <p style="margin-top: 16px;"><a href="/summarize" class="btn-primary">Tạo job mới</a></p>
+    {% elif job.status == 'failed' %}
+        <div class="job-error-box">
+            <h4>Lỗi</h4>
+            <p>{{ job.error_message }}</p>
+        </div>
+        <p style="margin-top: 16px;"><a href="/summarize" class="btn-primary">Thử lại</a></p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Tóm tắt tài liệu - FastAPI + AI Demo{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Tóm tắt tài liệu bằng LLM</h2>
+    <p>Nhập văn bản dài để trải nghiệm sự khác biệt giữa xử lý <strong>Background Task (Khuyên dùng cho UX)</strong>, <strong>Async</strong> và <strong>Sync</strong>.</p>
+
+    <div class="mode-container">
+        <!-- 1. Background task -->
+        <div class="mode-box">
+            <h3>1. Phiên bản Background Job (Tối ưu trải nghiệm)</h3>
+            <p class="mode-desc">Trả lời ngay lập tức với mã Job ID, chuyển hướng sang trang theo dõi tiến trình trong lúc server chạy ngầm.</p>
+            <form method="post" action="/summarize/background" class="chat-form">
+                <label><strong>Nội dung tài liệu</strong></label>
+                <textarea name="document_text" rows="6" placeholder="Dán tài liệu dài vào đây..." required></textarea>
+                <button type="submit" class="btn-primary">Tạo job nền (Background)</button>
+            </form>
+        </div>
+
+        <!-- 2. Async -->
+        <div class="mode-box" style="margin-top: 24px;">
+            <h3>2. Phiên bản Async (Bất đồng bộ)</h3>
+            <p class="mode-desc">Không chặn luồng I/O của server bằng <code>httpx.AsyncClient</code>, người dùng chờ trực tiếp đến khi có kết quả.</p>
+            <form method="post" action="/summarize/async" class="chat-form">
+                <label><strong>Nội dung tài liệu</strong></label>
+                <textarea name="document_text" rows="4" placeholder="Dán tài liệu cần tóm tắt..." required></textarea>
+                <button type="submit" class="btn-secondary">Tóm tắt bất đồng bộ (Async)</button>
+            </form>
+        </div>
+
+        <!-- 3. Sync -->
+        <div class="mode-box" style="margin-top: 24px;">
+            <h3>3. Phiên bản Sync (Đồng bộ)</h3>
+            <p class="mode-desc">Chờ chặn tuần tự bằng <code>requests.post</code>. Thường làm chậm toàn bộ request nếu mạng hoặc model phản hồi lâu.</p>
+            <form method="post" action="/summarize/sync" class="chat-form">
+                <label><strong>Nội dung tài liệu</strong></label>
+                <textarea name="document_text" rows="4" placeholder="Dán tài liệu cần tóm tắt..." required></textarea>
+                <button type="submit" class="btn-outline">Tóm tắt đồng bộ (Sync)</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
